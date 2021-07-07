@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  jupiter:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ${HUB_URL}:web
+    entrypoint: ["jupyter", "lab", "--ip=0.0.0.0", "--allow-root"]
+    volumes:
+      - ./projects:/home/jovyan/projects
+    ports:
+    - 9999:8888
