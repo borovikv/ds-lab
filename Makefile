@@ -10,8 +10,12 @@ docker-push:
 	docker-compose -f docker-compose.yml push
 
 # starting services
-start-service:
+docker-up:
 	docker-compose -f docker-compose.yml up -d
 
-stop-service:
+docker-down:
 	docker-compose -f docker-compose.yml down -v
+
+startproject:
+	python manage.py $(name)
+	git init projects/$(name)

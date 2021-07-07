@@ -2,10 +2,11 @@ version: '3.8'
 
 services:
   jupiter:
+    container_name: ds-lab
     build:
       context: .
       dockerfile: Dockerfile
-    image: ${HUB_URL}:web
+    image: ${HUB_URL}:ds-lab
     entrypoint: ["jupyter", "lab", "--ip=0.0.0.0", "--allow-root"]
     volumes:
       - ./projects:/home/jovyan/projects

@@ -28,3 +28,4 @@ widgetsnbextension==3.5.*
 xlrd==2.0.*
 langdetect
 nltk==3.6.*
+cookiecutter
