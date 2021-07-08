@@ -7,6 +7,8 @@ services:
       context: .
       dockerfile: Dockerfile
     image: ${HUB_URL}:ds-lab
+    environment:
+      - PYTHONPATH=/home/jovyan/projects
     entrypoint: ["jupyter", "lab", "--ip=0.0.0.0", "--allow-root"]
     volumes:
       - ./projects:/home/jovyan/projects

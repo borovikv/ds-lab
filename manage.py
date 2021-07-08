@@ -4,14 +4,13 @@ import shutil
 
 
 project_structure = [
-    'data/predictions',  # The results of your model predictions.
+    'data/original',  # The original, immutable data dump.
     'data/processed',  # The final, canonical data sets for modeling.
-    'data/raw',  # The original, immutable data dump.
-    'models',  # Trained and serialized models, model predictions, or model summaries
+    'data/results',  # The results of your project work.
+    'models',  # Trained and serialized models, model predictions, or model summaries.
     'notebooks',  # Jupyter notebooks.
     'reports',  # Generated analysis as HTML, PDF, LaTeX, etc.
-    'src',  # modules
-    'sql',  # queries
+    'sql',  # queries.
 ]
 
 
