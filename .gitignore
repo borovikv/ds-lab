@@ -3,3 +3,5 @@ projects/
 data/
 models/
 reports/
+*checkpoint.ipynb
+.ipynb_checkpoints/
