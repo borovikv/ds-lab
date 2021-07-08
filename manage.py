@@ -11,6 +11,7 @@ project_structure = [
     'notebooks',  # Jupyter notebooks.
     'reports',  # Generated analysis as HTML, PDF, LaTeX, etc.
     'src',  # modules
+    'sql',  # queries
 ]
 
 
