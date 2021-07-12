@@ -13,4 +13,4 @@ services:
     volumes:
       - ./projects:/home/jovyan/projects
     ports:
-    - 9999:8888
+    - 8888:8888
