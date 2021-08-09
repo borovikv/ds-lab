@@ -17,5 +17,10 @@ docker-down:
 	docker-compose -f docker-compose.yml down -v
 
 startproject:
-	python manage.py $(name)
-	git init projects/$(name)
+	python manage.py start_project $(name)
+
+pull-data:
+	python manage.py pull_data $(name)
+
+push-data:
+	python manage.py push_data $(name)
