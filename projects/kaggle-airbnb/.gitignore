@@ -1,0 +1,6 @@
+.idea/
+data/
+models/
+reports/
+*checkpoint.ipynb
+.ipynb_checkpoints/
