@@ -15,7 +15,6 @@ RUN conda install --quiet --yes --file /tmp/requirements.txt && \
     conda clean --all -f -y && \
     fix-permissions "${CONDA_DIR}" && \
     fix-permissions "/home/${NB_USER}"
-RUN conda install --yes pytorch torchvision torchaudio -c pytorch
 COPY requirements.*.txt /tmp/
 RUN pip install -r /tmp/requirements.optional.txt
 ## Install facets which does not have a pip or conda package at the moment
