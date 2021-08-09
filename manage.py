@@ -17,7 +17,7 @@ project_structure = [
 def start_project(project_name):
     base_dir = os.path.dirname(__file__)
     for path in project_structure:
-        os.makedirs(os.path.join(base_dir, 'projects', project_name, path))
+        os.makedirs(os.path.join(base_dir, 'projects', project_name, path), exist_ok=True)
     shutil.copy(os.path.join(base_dir, '.gitignore'), os.path.join(base_dir, 'projects', project_name, '.gitignore'))
 
 
