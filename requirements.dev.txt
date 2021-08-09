@@ -1,2 +1,1 @@
-keybert
 tqdm==4.61.2
