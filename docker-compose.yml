@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  jupiter:
+  jupyter:
     container_name: ds-lab
     build:
       context: .
