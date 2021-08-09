@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   jupyter:
-    container_name: ds-lab
+    container_name: datalab
     build:
       context: .
       dockerfile: Dockerfile
