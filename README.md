@@ -15,7 +15,7 @@ The above creates full folder structure (data, notebooks, models, etc) in projec
 
 3. Run ds-lab docker using:
 ```shell
-docker-compose up
+make docker-up
 ```
 This launches the docker image. In console you will have a message saying how to access the jupyterlab, analogous to the one below:
 ```
