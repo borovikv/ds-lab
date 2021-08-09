@@ -16,7 +16,7 @@ RUN conda install --quiet --yes --file /tmp/requirements.txt && \
     fix-permissions "${CONDA_DIR}" && \
     fix-permissions "/home/${NB_USER}"
 COPY requirements.*.txt /tmp/
-RUN pip install -r /tmp/requirements.optional.txt
+RUN pip install -r /tmp/requirements.dev.txt
 ## Install facets which does not have a pip or conda package at the moment
 WORKDIR /tmp
 RUN git clone https://github.com/PAIR-code/facets.git && \
