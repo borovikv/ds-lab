@@ -5,3 +5,4 @@ reports/
 *checkpoint.ipynb
 .ipynb_checkpoints/
 *.DS_Store
+catboost_info/

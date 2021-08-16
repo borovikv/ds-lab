@@ -5,7 +5,7 @@ LABEL maintainer="Jupyter Project <jupyter@googlegroups.com>"
 
 USER root
 
-RUN apt-get update
+RUN apt-get update && apt install -y g++
 
 USER ${NB_UID}
 
