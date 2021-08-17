@@ -2,3 +2,6 @@ tqdm==4.61.2
 shap
 lightgbm
 optuna
+pyarrow
+ipython-autotime
+catboost
