@@ -23,14 +23,22 @@ test_users = pd.read_csv('../data/original/test_users.csv')
 train_users.shape, test_users.shape
 
 
-# In[3]:
+# In[5]:
 
 
 users = pd.concat([train_users, test_users], axis=0)
 users.shape
 
 
-# In[4]:
+# In[6]:
+
+
+users['train_flag'] = 1
+users.loc[users.id.isin(test_users.id), 'train_flag'] = 0
+users.train_flag.value_counts()
+
+
+# In[7]:
 
 
 users.date_account_created = users.date_account_created.apply(lambda x: datetime.strptime(x, '%Y-%m-%d'))
@@ -38,20 +46,20 @@ users.timestamp_first_active = users.timestamp_first_active.apply(lambda x: date
 users.date_first_booking = users.date_first_booking.apply(lambda x: datetime.strptime(x, '%Y-%m-%d') if pd.notna(x) else None)
 
 
-# In[5]:
+# In[8]:
 
 
 users.head()
 
 
-# In[6]:
+# In[9]:
 
 
 sessions = pd.read_csv('../data/original/sessions.csv')
 sessions.shape
 
 
-# In[7]:
+# In[10]:
 
 
 sessions.head()
@@ -60,7 +68,7 @@ sessions.head()
 # ### 1 Checking whether sessions are present for all users. 
 # ### It appears that around sessions data is available for only 34% of train users
 
-# In[8]:
+# In[11]:
 
 
 ids = set(train_users.id.tolist()).intersection(set(sessions.user_id.tolist()))
@@ -70,7 +78,7 @@ len(ids), len(ids) * 100 / train_users.id.nunique()
 # ### 2 Checking whether sessions are present for all **TEST** users. 
 # ### It appears that sessions data is available for almost all test users
 
-# In[9]:
+# In[12]:
 
 
 ids = set(test_users.id.tolist()).intersection(set(sessions.user_id.tolist()))
@@ -81,13 +89,13 @@ len(ids), len(ids) * 100 / test_users.id.nunique()
 
 # ### 3.1 We need to drop users with no sesssions
 
-# In[10]:
+# In[13]:
 
 
 users.shape
 
 
-# In[11]:
+# In[14]:
 
 
 test_users[~test_users.id.isin(sessions.user_id)].id.nunique()
@@ -95,7 +103,7 @@ test_users[~test_users.id.isin(sessions.user_id)].id.nunique()
 
 # ### 3.1.1 Decided to leave users without sessions, as we would have dropped 428 users
 
-# In[12]:
+# In[15]:
 
 
 # users = users[users.id.isin(sessions.user_id)]
@@ -105,7 +113,7 @@ test_users[~test_users.id.isin(sessions.user_id)].id.nunique()
 
 # ### 3.2 We need to drop date_first_booking, as it is null for test set
 
-# In[12]:
+# In[16]:
 
 
 users.drop('date_first_booking', inplace=True, axis=1)
@@ -115,7 +123,7 @@ users.shape
 # ### 3.2.1 Need to update train_users and test_users dataframes after cleaning
 # No longer needed, as we did not drop any users
 
-# In[14]:
+# In[17]:
 
 
 # train_users.shape, test_users.shape
@@ -129,7 +137,7 @@ users.shape
 # train_users.shape
 
 
-# In[16]:
+# In[ ]:
 
 
 # test_users = test_users[test_users.id.isin(sessions.user_id)]
@@ -139,13 +147,13 @@ users.shape
 
 # ### 3.3 We need to drop sessions without any user_ids
 
-# In[13]:
+# In[20]:
 
 
 sessions.user_id.isna().sum(), (~sessions.user_id.isin(users.id)).sum()
 
 
-# In[14]:
+# In[21]:
 
 
 sessions = sessions[sessions.user_id.notna()]
@@ -157,33 +165,25 @@ sessions.shape
 
 # ### 3.4.1 Concatenating action, action_type, action_detail, and splitting into train and test sessions set
 
-# In[15]:
+# In[23]:
 
 
 sessions['action_info'] = sessions['action'].astype(str) + '_' + sessions['action_type'].astype(str) + '_' + sessions['action_detail'].astype(str)
 
 
-# In[16]:
+# In[24]:
 
 
 sessions.head()
 
 
-# In[17]:
+# In[25]:
 
 
 sessions.nunique()
 
 
-# In[18]:
-
-
-sessions_train = sessions[sessions.user_id.isin(train_users.id.tolist())]
-sessions_train.reset_index(drop=True, inplace=True)
-sessions_train.shape
-
-
-# In[19]:
+# In[ ]:
 
 
 sessions_test = sessions[sessions.user_id.isin(test_users.id.tolist())]
@@ -191,7 +191,7 @@ sessions_test.reset_index(drop=True, inplace=True)
 sessions_test.shape
 
 
-# In[20]:
+# In[ ]:
 
 
 sessions_train.nunique()
@@ -328,62 +328,28 @@ original_test_users.head()
 
 # ### 4. Saving data
 
-# In[34]:
-
-
-train_users = users[users.id.isin(train_users.id)]
-train_users.reset_index(drop=True, inplace=True)
-train_users.shape
-
-
-# In[35]:
-
-
-test_users = users[users.id.isin(test_users.id)]
-test_users.reset_index(drop=True, inplace=True)
-test_users.shape
-
-
-# In[36]:
-
-
-train_sessions = sessions[sessions.user_id.isin(train_users.id)]
-train_sessions.reset_index(drop=True, inplace=True)
-train_sessions.shape
-
-
-# In[37]:
-
-
-test_sessions = sessions[sessions.user_id.isin(test_users.id)]
-test_sessions.reset_index(drop=True, inplace=True)
-test_sessions.shape
-
-
-# In[40]:
-
-
-train_users.to_parquet('../data/processed/train_users.parquet')
-test_users.to_parquet('../data/processed/test_users.parquet')
-
-
-# In[41]:
-
-
-train_sessions.to_parquet('../data/processed/train_sessions.parquet')
-test_sessions.to_parquet('../data/processed/test_sessions.parquet')
-
-
-# In[22]:
+# In[26]:
 
 
 sessions.to_parquet('../data/processed/sessions.parquet')
 
 
-# In[23]:
+# In[27]:
 
 
 users.to_parquet('../data/processed/users.parquet')
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
 
 
 # In[ ]:

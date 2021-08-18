@@ -12,6 +12,7 @@ import seaborn as sns
 import pandas as pd
 import numpy as np
 from sklearn.utils.class_weight import compute_class_weight
+from datetime import datetime
 
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', 100)
@@ -30,6 +31,13 @@ df.shape
 # In[3]:
 
 
+df.drop('train_flag', inplace=True, axis=1)
+df.shape
+
+
+# In[4]:
+
+
 y, x = df.pop('country_destination'), df
 x.drop('user_id', axis=1, inplace=True)
 
@@ -42,7 +50,7 @@ x.drop('user_id', axis=1, inplace=True)
 
 # ### 1. Splitting tain data into stratified train, validation and test sets
 
-# In[4]:
+# In[5]:
 
 
 cat_features = [
@@ -66,13 +74,13 @@ cat_features = [
 ]
 
 
-# In[5]:
+# In[6]:
 
 
 x.gender.dtype
 
 
-# In[6]:
+# In[7]:
 
 
 for col in cat_features:
@@ -89,28 +97,28 @@ for col in cat_features:
         print(e)
 
 
-# In[7]:
+# In[8]:
 
 
-x_train, x_test, y_train, y_test = train_test_split(
+x_train_large, x_test, y_train_large, y_test = train_test_split(
     x, 
     y, 
     train_size=0.9, 
     random_state=42,
     stratify=y
 )
-x_train.shape, x_test.shape
+x_train_large.shape, x_test.shape
 
 
-# In[8]:
+# In[ ]:
 
 
 x_train, x_validation, y_train, y_validation = train_test_split(
-    x_train, 
-    y_train, 
+    x_train_large, 
+    y_train_large, 
     train_size=0.8,
     random_state=42,
-    stratify=y_train
+    stratify=y_train_large
 )
 x_train.shape, x_validation.shape
 
@@ -151,11 +159,11 @@ weights
 class_weights = dict(zip(classes, weights))
 
 
-# In[20]:
+# In[9]:
 
 
 model = CatBoostClassifier(
-    iterations=500,
+    iterations=100,
     random_seed=42,
 #     learning_rate=0.25,
     custom_loss=['AUC', 'Accuracy'],
@@ -239,12 +247,62 @@ sns.heatmap(cm, annot=True, fmt='g');
 
 
 
+# ### 4. Training on x_train_large, i.e. on 90% of training data instead of 70%
+
+# In[10]:
+
+
+model.fit(
+    x_train_large, y_train_large,
+    cat_features=cat_features,
+    eval_set=(x_test, y_test),
+    early_stopping_rounds=10,
+    use_best_model=True,
+    verbose=False,
+    plot=True
+);
+
+
+# In[11]:
+
+
+y_pred = model.predict(x_test)
+
+
+# In[12]:
+
+
+accuracy_score(y_true=y_test, y_pred=y_pred)
+
+
+# In[13]:
+
+
+accuracy_score(y_true=y_test, y_pred=y_pred)
+
+
+# In[ ]:
+
+
+
+
+
 # ### 5. Saving Model
 
-# In[26]:
+# In[13]:
 
 
-model.save_model('../models/model3.cbm')
+def save_model(model, ext='cbm'):
+    ts = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+    if ext == 'cbm':
+        print(f'saving model with ts: {ts}')
+        model.save_model(f'../models/model_{ts}.cbm')
+
+
+# In[14]:
+
+
+save_model(model)
 
 
 # In[ ]:

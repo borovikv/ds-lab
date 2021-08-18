@@ -11,6 +11,7 @@ import pandas as pd
 from collections import Counter
 from tqdm.notebook import tqdm
 import numpy as np
+import glob
 
 
 # ### 0. Loading and preparing data
@@ -25,30 +26,35 @@ df.shape
 # In[3]:
 
 
-df.reset_index(drop=True, inplace=True)
+df.drop('train_flag', inplace=True, axis=1)
+df.shape
 
 
 # In[4]:
 
 
-df.head()
+df.reset_index(drop=True, inplace=True)
 
 
 # In[5]:
 
 
-df.drop('country_destination', axis=1, inplace=True)
+df.head()
 
 
 # In[6]:
 
 
+df.drop('country_destination', axis=1, inplace=True)
+
+
+# In[7]:
+
+
 x = df.drop('user_id', axis=1)
 
 
-# ### 1. Splitting tain data into stratified train, validation and test sets
-
-# In[7]:
+# In[8]:
 
 
 cat_features = [
@@ -68,7 +74,7 @@ cat_features = [
 ]
 
 
-# In[8]:
+# In[9]:
 
 
 for col in cat_features:
@@ -81,8 +87,25 @@ for col in cat_features:
 # In[10]:
 
 
+def find_latest_model(path='../models/', ext='cbm'):
+    files = glob.glob(f"{path}*.{ext}")
+    files = [file for file in files if len(file) > 25]
+    files = sorted(files)
+    return files[-1]
+
+
+# In[11]:
+
+
+path = find_latest_model()
+path
+
+
+# In[12]:
+
+
 model = CatBoostClassifier()
-model.load_model('../models/model3.cbm')
+model.load_model(path)
 
 
 # ### 3. Predicting Country of Destination
@@ -164,34 +187,34 @@ model.load_model('../models/model3.cbm')
 
 # ### 3.3 Predicting 5 Countries of Destination per each user
 
-# In[11]:
+# In[13]:
 
 
 classes = list(model.classes_)
 classes
 
 
-# In[12]:
+# In[14]:
 
 
 preds = model.predict_proba(x)
 preds = preds.tolist()
 
 
-# In[13]:
+# In[15]:
 
 
 preds_df = pd.DataFrame({'preds': preds})
 preds_df['amax'] = preds_df.preds.apply(lambda x: max(x))
 
 
-# In[14]:
+# In[16]:
 
 
 preds_df.head()
 
 
-# In[15]:
+# In[17]:
 
 
 def find_max_n_indeces(x, n=1):
@@ -206,28 +229,16 @@ def get_best_n_result(x, n=5):
     return best_n
 
 
-# In[16]:
+# In[18]:
 
 
 find_max_n_indeces(preds_df.loc[0].preds, n=5), get_best_n_result(preds_df.loc[0].preds, n=5)
 
 
-# In[17]:
-
-
-preds_df['best5'] = preds_df.preds.apply(lambda x: get_best_n_result(x, n=5))
-
-
-# In[18]:
-
-
-preds_df.head()
-
-
 # In[19]:
 
 
-preds_df['id'] = df['user_id']
+preds_df['best5'] = preds_df.preds.apply(lambda x: get_best_n_result(x, n=5))
 
 
 # In[20]:
@@ -239,11 +250,23 @@ preds_df.head()
 # In[21]:
 
 
+preds_df['id'] = df['user_id']
+
+
+# In[22]:
+
+
+preds_df.head()
+
+
+# In[23]:
+
+
 submission = preds_df[['id', 'best5']].explode('best5')
 submission.shape
 
 
-# In[22]:
+# In[24]:
 
 
 submission.head()
@@ -263,16 +286,22 @@ submission.head()
 
 # ### 4 Saving NDCG aware submission
 
-# In[23]:
+# In[25]:
 
 
 submission.columns = ['id', 'country']
 
 
-# In[24]:
+# In[26]:
 
 
-submission.to_csv('../data/results/submission9.csv', index=False)
+path[-24:-4]
+
+
+# In[27]:
+
+
+submission.to_csv(f'../data/results/submission{path[-24:-4]}.csv', index=False)
 
 
 # In[ ]:
