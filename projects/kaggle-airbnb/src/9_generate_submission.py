@@ -19,42 +19,46 @@ import glob
 # In[2]:
 
 
+# df = pd.read_parquet('../data/processed/test_features.parquet')
+# df = pd.read_parquet('../data/processed/test_features_uncorr.parquet')
 df = pd.read_parquet('../data/processed/test_features.parquet')
-df.shape
-
-
-# In[3]:
-
-
-df.drop('train_flag', inplace=True, axis=1)
 df.shape
 
 
 # In[4]:
 
 
-df.reset_index(drop=True, inplace=True)
+df['nan_counts'] = df.isnull().sum(axis=1)
 
 
 # In[5]:
 
 
-df.head()
+if 'train_flag' in df:
+    df.drop('train_flag', inplace=True, axis=1)
+    df.reset_index(drop=True, inplace=True)
+    df.shape
 
 
 # In[6]:
 
 
-df.drop('country_destination', axis=1, inplace=True)
+df.head()
 
 
 # In[7]:
 
 
-x = df.drop('user_id', axis=1)
+df.drop('country_destination', axis=1, inplace=True)
 
 
 # In[8]:
+
+
+x = df.drop('user_id', axis=1)
+
+
+# In[9]:
 
 
 cat_features = [
@@ -71,20 +75,32 @@ cat_features = [
     'dow_registered',
     'hr_registered',
     'age_group',
+    'dow_registered',
+    'day_registered',
+    'month_registered',
+    'year_registered',
 ]
 
 
-# In[9]:
+# In[10]:
 
 
-for col in cat_features:
+cat_features_remained = list(set(cat_features).intersection(set(df)))
+cat_features_removed = set(cat_features) - set(df)
+len(cat_features), len(cat_features_remained), len(cat_features_removed)                                      
+
+
+# In[11]:
+
+
+for col in cat_features_remained:
     x[col].fillna('', inplace=True)
     x[col] = x[col].astype('category')
 
 
 # ### 2. Loading model
 
-# In[10]:
+# In[12]:
 
 
 def find_latest_model(path='../models/', ext='cbm'):
@@ -94,127 +110,50 @@ def find_latest_model(path='../models/', ext='cbm'):
     return files[-1]
 
 
-# In[11]:
+# In[13]:
 
 
 path = find_latest_model()
 path
 
 
-# In[12]:
+# In[14]:
 
 
 model = CatBoostClassifier()
 model.load_model(path)
 
 
-# ### 3. Predicting Country of Destination
-
-# In[10]:
-
-
-# x_pool = Pool(x, cat_features=cat_features)
-
-
-# In[11]:
-
-
-# preds = model.predict(x, prediction_type='Class')
-# preds = [el[0] for el in preds.tolist()]
-
-
-# In[12]:
-
-
-# Counter(preds)
-
-
-# ### 3.2 Predicting Country of Destination using multiple predicitons where applicable
-
-# In[13]:
-
-
-# classes = list(model.classes_)
-# classes
-
-# preds = model.predict_proba(x)
-# preds = preds.tolist()
-# # preds = [el[0] for el in preds]
-# preds_df = pd.DataFrame(preds)
-# preds_df.shape
-
-# preds_df['preds'] = preds
-
-# preds_df['amax'] = preds_df.preds.apply(lambda x: max(x))
-
-# preds_df.head()
-
-# def find_nth_max_index(x, ix=1):
-#     second_max = sorted(x)[-ix]
-#     return x.index(second_max)
-
-
-# def get_nth_best_result(x, ix=1):
-#     return classes[find_nth_max_index(x, ix=ix)]
-
-# find_nth_max_index(preds_df.loc[0].preds), get_nth_best_result(preds_df.loc[0].preds)
-
-# preds_df['second'] = preds_df.preds.apply(lambda x: get_nth_best_result(x, ix=2))
-# preds_df['first'] = preds_df.preds.apply(lambda x: get_nth_best_result(x))
-
-# preds_df.head()
-
-# preds_df['result'] = preds_df[['first', 'second']].apply(lambda x: list(x), axis=1)
-
-# preds_df.head()
-
-# mask = preds_df.amax < 0.65
-# mask.sum()
-
-# preds_df.loc[~mask, 'result'] = preds_df.loc[~mask, 'first']
-
-# preds_df['id'] = df['user_id']
-
-# preds_df.sample(10, random_state=42)
-
-# submission = preds_df[['id', 'result']].explode('result')
-# submission.shape
-
-# submission.head()
-
-# submission[submission.id == 'ycr4e6e5qv']
-
-
 # ### 3.3 Predicting 5 Countries of Destination per each user
 
-# In[13]:
+# In[15]:
 
 
 classes = list(model.classes_)
 classes
 
 
-# In[14]:
+# In[16]:
 
 
 preds = model.predict_proba(x)
 preds = preds.tolist()
 
 
-# In[15]:
+# In[17]:
 
 
 preds_df = pd.DataFrame({'preds': preds})
 preds_df['amax'] = preds_df.preds.apply(lambda x: max(x))
 
 
-# In[16]:
+# In[41]:
 
 
 preds_df.head()
 
 
-# In[17]:
+# In[22]:
 
 
 def find_max_n_indeces(x, n=1):
@@ -229,44 +168,56 @@ def get_best_n_result(x, n=5):
     return best_n
 
 
-# In[18]:
+# In[23]:
 
 
 find_max_n_indeces(preds_df.loc[0].preds, n=5), get_best_n_result(preds_df.loc[0].preds, n=5)
 
 
-# In[19]:
+# In[43]:
+
+
+find_max_n_indeces(preds_df.loc[0].preds, n=5), get_best_n_result(preds_df.loc[0].preds, n=5)
+
+
+# In[24]:
 
 
 preds_df['best5'] = preds_df.preds.apply(lambda x: get_best_n_result(x, n=5))
 
 
-# In[20]:
+# In[25]:
 
 
 preds_df.head()
 
 
-# In[21]:
+# In[45]:
+
+
+preds_df.head()
+
+
+# In[26]:
 
 
 preds_df['id'] = df['user_id']
 
 
-# In[22]:
+# In[27]:
 
 
 preds_df.head()
 
 
-# In[23]:
+# In[28]:
 
 
 submission = preds_df[['id', 'best5']].explode('best5')
 submission.shape
 
 
-# In[24]:
+# In[29]:
 
 
 submission.head()
@@ -286,19 +237,19 @@ submission.head()
 
 # ### 4 Saving NDCG aware submission
 
-# In[25]:
+# In[30]:
 
 
 submission.columns = ['id', 'country']
 
 
-# In[26]:
+# In[31]:
 
 
 path[-24:-4]
 
 
-# In[27]:
+# In[32]:
 
 
 submission.to_csv(f'../data/results/submission{path[-24:-4]}.csv', index=False)
@@ -338,6 +289,159 @@ submission.to_csv(f'../data/results/submission{path[-24:-4]}.csv', index=False)
 
 
 
+
+
+# In[31]:
+
+
+def get_sum_of_top_n(x, n=1):
+    return sum(sorted(x, reverse=True)[:n])
+
+
+# In[39]:
+
+
+preds_df['sum5'] = preds_df.preds.apply(lambda x: get_sum_of_top_n(x, 5))
+preds_df['sum4'] = preds_df.preds.apply(lambda x: get_sum_of_top_n(x, 4))
+
+
+# In[104]:
+
+
+preds_df.head()
+
+
+# In[129]:
+
+
+s = preds_df[['id', 'preds']].explode('preds').copy(deep=True)
+s.shape
+
+
+# In[130]:
+
+
+s.preds = s.preds.astype(float)
+
+
+# In[131]:
+
+
+classes
+
+
+# In[132]:
+
+
+s['country'] = classes * int(len(s) / len(classes))
+
+
+# In[133]:
+
+
+s.head()
+
+
+# In[134]:
+
+
+type(s.loc[0].preds)
+
+
+# In[135]:
+
+
+s = s.sort_values(['id', 'preds'], ascending=[True, False])
+s.reset_index(drop=True, inplace=True)
+
+
+# In[136]:
+
+
+ss = s[['id', 'preds']].groupby('id', as_index=False).preds.cumsum()
+
+
+# In[137]:
+
+
+s['preds_sum'] = ss
+
+
+# In[138]:
+
+
+s.head(15)
+
+
+# In[183]:
+
+
+best = s.groupby('id', as_index=False).head(4)
+best.shape
+
+
+# In[184]:
+
+
+best.head()
+
+
+# In[185]:
+
+
+result = s[s.preds_sum < 0.90]
+result.shape, s.shape, result.id.nunique(), s.id.nunique()
+
+
+# In[186]:
+
+
+result = pd.concat([best, result])
+result = result.drop_duplicates(['id', 'country'])
+result.shape, s.shape, result.id.nunique(), s.id.nunique()
+
+
+# In[187]:
+
+
+result[['id', 'country']].to_csv('../data/results/submission_cumsum_head3_90.csv', index=False)
+result.shape
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[33]:
+
+
+'gender' in df
+
+
+# In[4]:
+
+
+df.shape
+
+
+# In[5]:
+
+
+users = pd.get_dummies(df[['gender', 'user_id', 'country_destination']], columns=['gender'])
+
+
+# In[6]:
+
+
+users.head()
 
 
 # In[ ]:

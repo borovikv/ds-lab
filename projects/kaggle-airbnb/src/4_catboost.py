@@ -13,6 +13,7 @@ import pandas as pd
 import numpy as np
 from sklearn.utils.class_weight import compute_class_weight
 from datetime import datetime
+import pickle
 
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', 100)
@@ -24,15 +25,18 @@ get_ipython().run_line_magic('load_ext', 'autotime')
 # In[2]:
 
 
-df = pd.read_parquet('../data/processed/train_features.parquet')
+# df = pd.read_parquet('../data/processed/train_features.parquet')
+# df = pd.read_parquet('../data/processed/train_features_uncorr.parquet')
+df = pd.read_parquet('../data/processed/train_features_undersample.parquet')
 df.shape
 
 
 # In[3]:
 
 
-df.drop('train_flag', inplace=True, axis=1)
-df.shape
+if 'train_flag' in list(df):
+    df.drop('train_flag', inplace=True, axis=1)
+    df.shape
 
 
 # In[4]:
@@ -77,13 +81,15 @@ cat_features = [
 # In[6]:
 
 
-x.gender.dtype
+cat_features_remained = list(set(cat_features).intersection(set(df)))
+cat_features_removed = set(cat_features) - set(df)
+len(cat_features), len(cat_features_remained), len(cat_features_removed)                                      
 
 
 # In[7]:
 
 
-for col in cat_features:
+for col in cat_features_remained:
     try:
         if col not in list(x):
             print(col)
@@ -110,7 +116,7 @@ x_train_large, x_test, y_train_large, y_test = train_test_split(
 x_train_large.shape, x_test.shape
 
 
-# In[ ]:
+# In[9]:
 
 
 x_train, x_validation, y_train, y_validation = train_test_split(
@@ -125,13 +131,13 @@ x_train.shape, x_validation.shape
 
 # ### 1.1 Checking that the ratios of the target class are invariant
 
-# In[9]:
+# In[10]:
 
 
 # y_train.value_counts() / len(y_train)
 
 
-# In[10]:
+# In[11]:
 
 
 # y_validation.value_counts() / len(y_validation)
@@ -139,27 +145,27 @@ x_train.shape, x_validation.shape
 
 # ### 2. Model Training
 
-# In[11]:
+# In[10]:
 
 
 classes = np.unique(y_train)
 classes
 
 
-# In[12]:
+# In[11]:
 
 
 weights = compute_class_weight(class_weight='balanced', classes=classes, y=y_train)
 weights
 
 
-# In[13]:
+# In[12]:
 
 
 class_weights = dict(zip(classes, weights))
 
 
-# In[9]:
+# In[13]:
 
 
 model = CatBoostClassifier(
@@ -174,12 +180,12 @@ model = CatBoostClassifier(
 )
 
 
-# In[21]:
+# In[35]:
 
 
 model.fit(
     x_train, y_train,
-    cat_features=cat_features,
+    cat_features=cat_features_remained,
     eval_set=(x_validation, y_validation),
     early_stopping_rounds=50,
     use_best_model=True,
@@ -190,26 +196,33 @@ model.fit(
 
 # ### 3. Testing model on test sets
 
-# In[22]:
+# In[19]:
 
 
 y_pred = model.predict(x_test)
 
 
-# In[23]:
+# In[20]:
 
 
 labels = y_validation.value_counts().index.tolist()
 labels
 
 
-# In[24]:
+# In[21]:
 
 
 cm = confusion_matrix(y_test, y_pred, labels=labels, normalize='all')
 
 
 # ### Confusion Matrix when iterations=500
+
+# In[22]:
+
+
+plt.figure(figsize = (20, 15))
+sns.heatmap(cm, annot=True, fmt='g');
+
 
 # In[25]:
 
@@ -249,12 +262,12 @@ sns.heatmap(cm, annot=True, fmt='g');
 
 # ### 4. Training on x_train_large, i.e. on 90% of training data instead of 70%
 
-# In[10]:
+# In[14]:
 
 
 model.fit(
     x_train_large, y_train_large,
-    cat_features=cat_features,
+    cat_features=cat_features_remained,
     eval_set=(x_test, y_test),
     early_stopping_rounds=10,
     use_best_model=True,
@@ -263,22 +276,40 @@ model.fit(
 );
 
 
-# In[11]:
+# In[15]:
 
 
 y_pred = model.predict(x_test)
 
 
-# In[12]:
+# In[16]:
 
 
 accuracy_score(y_true=y_test, y_pred=y_pred)
 
 
-# In[13]:
+# In[20]:
 
 
 accuracy_score(y_true=y_test, y_pred=y_pred)
+
+
+# In[25]:
+
+
+accuracy_score(y_true=y_test, y_pred=y_pred)
+
+
+# In[26]:
+
+
+accuracy_score(y_true=y_test, y_pred=y_pred)
+
+
+# In[ ]:
+
+
+[a1, a2, a2, a3, a1, a2]
 
 
 # In[ ]:
@@ -289,7 +320,7 @@ accuracy_score(y_true=y_test, y_pred=y_pred)
 
 # ### 5. Saving Model
 
-# In[13]:
+# In[17]:
 
 
 def save_model(model, ext='cbm'):
@@ -299,10 +330,48 @@ def save_model(model, ext='cbm'):
         model.save_model(f'../models/model_{ts}.cbm')
 
 
-# In[14]:
+# In[18]:
 
 
 save_model(model)
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# 1. Features set reduction by
+#  - columns with nan values over 99%
+#  - low variance removel
+#  - highly correlated features > 0.80 (both with absolute)
+# 2. Change submission generating, take top X with sum of probabilities > 90%
+
+# In[ ]:
+
+
+
+
+
+# In[19]:
+
+
+with open('../data/processed/x_test_uncorr.pickle', 'wb') as f:
+    pickle.dump(x_test, f)
+
+
+# In[20]:
+
+
+with open('../data/processed/y_test_uncorr.pickle', 'wb') as f:
+    pickle.dump(y_test, f)
 
 
 # In[ ]:
