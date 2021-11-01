@@ -11,6 +11,6 @@ services:
       - PYTHONPATH=/home/jovyan/projects
     entrypoint: ["jupyter", "lab", "--ip=0.0.0.0", "--allow-root"]
     volumes:
-      - ./projects:/home/jovyan/projects
+      - ../jupiter-projects:/home/jovyan/projects
     ports:
     - 8888:8888

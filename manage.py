@@ -1,7 +1,5 @@
 import os
 import sys
-import shutil
-
 
 project_structure = [
     'data/original',  # The original, immutable data dump.
@@ -15,10 +13,9 @@ project_structure = [
 
 
 def start_project(project_name):
-    base_dir = os.path.dirname(__file__)
+    base_dir = os.path.dirname(os.path.dirname(__file__))
     for path in project_structure:
-        os.makedirs(os.path.join(base_dir, 'projects', project_name, path))
-    shutil.copy(os.path.join(base_dir, '.gitignore'), os.path.join(base_dir, 'projects', project_name, '.gitignore'))
+        os.makedirs(os.path.join(base_dir, 'jupiter-projects', project_name, path))
 
 
 if __name__ == '__main__':
