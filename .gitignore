@@ -6,3 +6,4 @@ reports/
 *checkpoint.ipynb
 .ipynb_checkpoints/
 .DS_Store
+requirements.dev.txt

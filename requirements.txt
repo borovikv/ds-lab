@@ -28,4 +28,11 @@ widgetsnbextension==3.5.*
 xlrd==2.0.*
 langdetect
 nltk==3.6.*
-cookiecutter
+tqdm==4.61.2
+cvxopt==1.2.7
+pandas-datareader==0.10.0
+pipdeptree==2.2.0
+PuLP==2.5.1
+SQLAlchemy==1.4.26
+yfinance==0.1.64
+keras

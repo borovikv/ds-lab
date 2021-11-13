@@ -4,6 +4,7 @@ current_dir = $(shell pwd)
 
 
 build:
+	cp ../jupiter-projects/requirements.txt requirements.dev.txt
 	docker-compose -f docker-compose.yml build
 
 push:
