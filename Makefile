@@ -21,4 +21,8 @@ startproject:
 	python manage.py $(name)
 
 url:
-	docker exec -it ds-lab  jupyter server list --json | python3 -c "import sys, json; print('http://127.0.0.1:8888/?token=' + json.load(sys.stdin)['token'])"
+	open $(shell docker exec -it ds-lab  jupyter server list --json | python3 -c "import sys, json; print('http://127.0.0.1:8888/?token=' + json.load(sys.stdin)['token'])")
+
+jupyter:
+	make up
+	make url
