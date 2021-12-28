@@ -32,6 +32,8 @@ ENV XDG_CACHE_HOME="/home/${NB_USER}/.cache/"
 RUN MPLBACKEND=Agg python -c "import matplotlib.pyplot" && \
     fix-permissions "/home/${NB_USER}"
 
+RUN python -c "import nltk; nltk.download('punkt')"
+
 RUN rm -rf /home/${NB_USER}/work/
 
 USER ${NB_UID}
