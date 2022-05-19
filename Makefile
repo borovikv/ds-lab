@@ -7,9 +7,6 @@ build:
 	cp ../jupiter-projects/requirements.txt requirements.dev.txt
 	docker-compose -f docker-compose.yml build
 
-push:
-	docker-compose -f docker-compose.yml push
-
 # starting services
 up:
 	docker-compose -f docker-compose.yml up -d
