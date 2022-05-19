@@ -1,27 +1,34 @@
 # ds-lab
 
-## A cookiecutter for a complete out of the box Data Science projects environment in Docker.
+This is a project for a complete out of the box Data Science projects environment in Docker.
+
+### Requirements
+
+1. Docker - see installation instructions [here](https://docs.docker.com/desktop/)
+2. git - check in terminal git --version, here is [installation instructions](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) if there is no git.
 
 ### A walkthrough on getting everything up and running:
 1. Build docker file using:
 ```shell
-make docker-build
+make build
 ```
 2. Prepare project directories, for example for kaggle-airbnb:
 ```shell
-python manage.py kaggle-airbnb
+make project name=Project_Name
 ```
 The above creates full folder structure (data, notebooks, models, etc) in projects folder within the kaggle-airbnb sub-folder
 
 3. Run ds-lab docker using:
 ```shell
-docker-compose up
+make up
 ```
-This launches the docker image. In console you will have a message saying how to access the jupyterlab, analogous to the one below:
-```
-ds-lab     | [I 2021-08-09 07:31:44.878 ServerApp]  or http://127.0.0.1:8888/lab?token=601131b246b16b7da00dc8179bb53c6e560fa71705402a2a
-```
-Click on the link above, this will open the jupyterlab in your browser.
 
-### Notes: 
-This project is setup so that by default the projects folder in docker is mounted to the ds-lab/projects folder on your machine. The work folder is located only on docker instance, and all data is lost with its re-instanciation. 
+4. Open Jupyter notebook in your browser run:
+```shell
+make jupyter
+```
+
+5. When you are finished with your work or there is need to restart Jupyter, run:
+```shell
+make down
+```

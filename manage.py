@@ -13,9 +13,13 @@ project_structure = [
 
 
 def start_project(project_name):
-    base_dir = os.path.dirname(__file__)
+    base_dir = os.path.dirname(os.path.dirname(__file__))
     for path in project_structure:
-        os.makedirs(os.path.join(base_dir, project_name, path))
+        os.makedirs(os.path.join(base_dir, 'jupiter-projects', project_name, path))
+    requirements = os.path.join(base_dir, 'jupiter-projects', 'requirements.txt')
+    if not os.path.exists(requirements):
+        with open(requirements, 'w') as f:
+            f.write('')
 
 
 if __name__ == '__main__':

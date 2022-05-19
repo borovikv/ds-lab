@@ -11,10 +11,8 @@ USER ${NB_UID}
 
 COPY requirements.txt /tmp/
 # Install Python 3 packages
-RUN conda install --quiet --yes --file /tmp/requirements.txt && \
-    conda clean --all -f -y && \
-    fix-permissions "${CONDA_DIR}" && \
-    fix-permissions "/home/${NB_USER}"
+RUN conda install --quiet --yes --file /tmp/requirements.txt
+RUN fix-permissions "${CONDA_DIR}" && fix-permissions "/home/${NB_USER}"
 RUN conda install gcc --quiet --yes
 COPY requirements.dev.txt /tmp/
 RUN pip install -r /tmp/requirements.dev.txt

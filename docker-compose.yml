@@ -12,5 +12,6 @@ services:
     entrypoint: ["jupyter", "lab", "--ip=0.0.0.0", "--allow-root"]
     volumes:
       - ../jupiter-projects:/home/jovyan/projects
+      - ${HOME}/.aws/credentials:/home/jovyan/.aws/credentials:ro
     ports:
     - 8888:8888
