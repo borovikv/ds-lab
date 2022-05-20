@@ -55,3 +55,7 @@ Parent directory is `../jupiter-projects/Project_Name/`
 6. **reports** - Generated analysis as HTML, PDF, LaTeX, etc.
 7. **sql** - queries.
 
+### Useful links
+
+1. [Jupyter Notebook Tips, Tricks, and Shortcuts](https://www.dataquest.io/blog/jupyter-notebook-tips-tricks-shortcuts/#:~:text=Select%20Multiple%20Cells%3A,run%20them%20as%20a%20batch.)
+2. [SciKit](https://scikit-learn.org/stable/index.html)
